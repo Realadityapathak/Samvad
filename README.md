@@ -2,6 +2,8 @@
 
 > Full-stack real-time messaging application engineered for fast, private, and resilient communication across desktop, tablet, and mobile devices.
 
+![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?logo=vercel&logoColor=white)
+![Render](https://img.shields.io/badge/Render-Live-46E3B7?logo=render&logoColor=black)
 ![React](https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react&logoColor=black)
 ![Node.js](https://img.shields.io/badge/Node.js-24.19.0-339933?logo=node.js&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-4.21.2-000000?logo=express&logoColor=white)
@@ -9,9 +11,9 @@
 ![MongoDB](https://img.shields.io/badge/MongoDB-8.10.1-47A248?logo=mongodb&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.4.17-06B6D4?logo=tailwind-css&logoColor=white)
 ![DaisyUI](https://img.shields.io/badge/DaisyUI-4.12.24-5A0EF8?logo=daisyui&logoColor=white)
-![License](https://img.shields.io/badge/Status-Production--Ready-success)
+![Status](https://img.shields.io/badge/Status-Production--Ready-success)
 
-[Live Backend Service](https://chatify-live-backend.onrender.com/healthz) &bull; [GitHub Repository](https://github.com/Realadityapathak/Chat-App) &bull; [Quick Start](#getting-started) &bull; [API Reference](#api-reference) &bull; [Architecture](#architecture)
+[Live Web App](https://samvad-live.vercel.app/) &bull; [Live Backend API](https://samvad-live-backend.onrender.com/healthz) &bull; [GitHub Repository](https://github.com/Realadityapathak/Samvad) &bull; [Quick Start](#getting-started) &bull; [API Reference](#api-reference) &bull; [Architecture](#architecture)
 
 ---
 
@@ -568,32 +570,57 @@ The 13-step test suite validates:
 
 ## Deployment
 
-### Full-Stack Hosting (Render.com)
+Samvad is architected for production-grade decoupled hosting: the frontend Single Page Application is deployed on **Vercel** with global edge CDN distribution, while the real-time API and WebSocket engine runs on a **Render** Web Service backed by **MongoDB Atlas**.
 
-This application is pre-configured for full-stack deployment on [Render](https://render.com).
+### 1. Frontend Hosting (Vercel)
 
-#### 1. Web Service Configuration
-- **Environment**: Node
-- **Build Command**: `npm install && npm run build`
+The client application is deployed at [`https://samvad-live.vercel.app/`](https://samvad-live.vercel.app/).
+
+#### Configuration:
+- **Framework Preset**: Vite
+- **Root Directory**: `frontend` (or repository root `.`)
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Single Page Application Routing**: Configured via `vercel.json` rewrites (`"source": "/(.*)", "destination": "/"`).
+
+#### Environment Variables (Vercel):
+| Variable | Description | Example / Verified Value |
+| :--- | :--- | :--- |
+| `VITE_BACKEND_URL` | Render backend base URL (no trailing slash) | `https://samvad-live-backend.onrender.com` |
+
+---
+
+### 2. Backend & Real-Time Engine (Render.com)
+
+The API and WebSocket server is deployed at [`https://samvad-live-backend.onrender.com`](https://samvad-live-backend.onrender.com).
+
+#### Configuration:
+- **Service Type**: Web Service
+- **Runtime**: Node
+- **Root Directory**: `backend`
+- **Build Command**: `npm install`
 - **Start Command**: `npm start`
-- **Root Directory**: `.`
+- **Health Check Path**: `/healthz` (under Advanced Settings)
 
-#### 2. Required Production Environment Variables
-Set the following under Render Dashboard $\rightarrow$ Environment:
-```env
-NODE_ENV=production
-PORT=10000
-MONGO_URI=your_mongodb_atlas_connection_string
-JWT_SECRET=your_production_jwt_secret_key
-CLIENT_URL=https://your-app-domain.onrender.com
-CLOUDINARY_CLOUD_NAME=your_cloudinary_name
-CLOUDINARY_API_KEY=your_cloudinary_key
-CLOUDINARY_API_SECRET=your_cloudinary_secret
-ARCJET_KEY=your_arcjet_key
-ARCJET_ENV=production
-```
+#### Required Environment Variables (Render):
+| Variable | Description | Example / Recommended Value |
+| :--- | :--- | :--- |
+| `NODE_ENV` | Production execution mode | `production` |
+| `PORT` | Listening port for Node server | `3000` (or `10000`) |
+| `CLIENT_URL` | Permitted cross-origin frontend URL | `https://samvad-live.vercel.app` |
+| `MONGO_URI` | MongoDB Atlas replica set URI | `mongodb+srv://...` |
+| `JWT_SECRET` | 256-bit cryptographically secure string | *(Generated secret)* |
+| `RESEND_API_KEY` | Transactional email delivery key | `re_...` |
+| `EMAIL_FROM` | Verified sender address or sandbox | `onboarding@resend.dev` |
+| `EMAIL_FROM_NAME`| Display name for welcome emails | `Samvad` |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary asset cloud identifier | *(Cloudinary name)* |
+| `CLOUDINARY_API_KEY` | Cloudinary API key | *(Cloudinary key)* |
+| `CLOUDINARY_API_SECRET` | Cloudinary API secret | *(Cloudinary secret)* |
+| `ARCJET_KEY` | Arcjet bot and rate shield key | `ajkey_...` |
+| `ARCJET_ENV` | Arcjet runtime environment | `production` |
 
-When `NODE_ENV === "production"`, Express automatically serves the compiled `frontend/dist` assets and handles client-side routing fallback through `index.html`.
+> [!NOTE]
+> Behind Render's reverse proxy, Express enables `app.set("trust proxy", 1)` so cross-site authentication cookies (`SameSite=None; Secure`) are cleanly exchanged between `vercel.app` and `onrender.com`.
 
 ---
 
