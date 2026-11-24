@@ -4,10 +4,13 @@ import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 import { useThemeStore } from "./useThemeStore";
 
-const BASE_URL =
-  import.meta.env.MODE === "development"
+const rawBackendUrl =
+  import.meta.env.VITE_BACKEND_URL ||
+  (import.meta.env.MODE === "development"
     ? "http://localhost:3000"
-    : "https://chatify-live-backend.onrender.com";
+    : "https://samvad-live-backend.onrender.com");
+
+const BASE_URL = rawBackendUrl.replace(/\/$/, "");
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,

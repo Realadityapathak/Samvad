@@ -1,6 +1,7 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import path from "path";
+import fs from "fs";
 import cors from "cors";
 import mongoose from "mongoose";
 
@@ -17,14 +18,37 @@ import {
 const __dirname = path.resolve();
 const PORT = ENV.PORT || 3000;
 
+app.set("trust proxy", 1);
 app.use(express.json({ limit: "10mb" }));
+
+const clientUrls = (ENV.CLIENT_URL || "")
+  .split(",")
+  .map((url) => url.trim().replace(/\/$/, ""))
+  .filter(Boolean);
+
 const allowedOrigins = [
-  ENV.CLIENT_URL,
+  ...clientUrls,
+  "https://samvad-live.vercel.app",
   "http://localhost:5173",
   "http://127.0.0.1:5173",
 ].filter(Boolean);
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(cookieParser());
+
+// Root endpoint for status / health info
+app.get("/", (_, res) => {
+  const frontendDistPath = path.join(__dirname, "../frontend/dist/index.html");
+  if (ENV.NODE_ENV === "production" && fs.existsSync(frontendDistPath)) {
+    return res.sendFile(frontendDistPath);
+  }
+  res.status(200).json({
+    name: "Samvad API Server",
+    status: "running",
+    version: "1.0.0",
+    client: "https://samvad-live.vercel.app",
+    health: "/healthz",
+  });
+});
 
 // Healthcheck endpoint for orchestrators, uptime checks, and load balancers
 app.get("/healthz", (_, res) => {
@@ -41,13 +65,25 @@ app.get("/healthz", (_, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
-// Production frontend serving
+// Production frontend serving (if bundled with client build)
 if (ENV.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+  const frontendDistPath = path.join(__dirname, "../frontend/dist");
+  if (fs.existsSync(frontendDistPath)) {
+    app.use(express.static(frontendDistPath));
 
-  app.get("*", (_, res) => {
-    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
-  });
+    app.get("*", (_, res) => {
+      res.sendFile(path.join(frontendDistPath, "index.html"));
+    });
+  } else {
+    app.use("/api/*", notFoundHandler);
+    app.get("*", (_, res) => {
+      res.status(404).json({
+        message:
+          "This is the Samvad backend API server. For the web application, visit https://samvad-live.vercel.app",
+        health: "/healthz",
+      });
+    });
+  }
 } else {
   // In development, handle unknown API routes gracefully
   app.use("/api/*", notFoundHandler);

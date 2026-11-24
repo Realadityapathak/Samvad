@@ -9,8 +9,14 @@ import Message from "../models/Message.js";
 const app = express();
 const server = http.createServer(app);
 
+const clientUrls = (ENV.CLIENT_URL || "")
+  .split(",")
+  .map((url) => url.trim().replace(/\/$/, ""))
+  .filter(Boolean);
+
 const allowedOrigins = [
-  ENV.CLIENT_URL,
+  ...clientUrls,
+  "https://samvad-live.vercel.app",
   "http://localhost:5173",
   "http://127.0.0.1:5173",
 ].filter(Boolean);

@@ -11,7 +11,7 @@
     "dev:backend": "npm run dev --prefix backend",
     "dev:frontend": "npm run dev --prefix frontend",
     "lint": "npm run lint --prefix frontend",
-    "test": "node \"C:/Users/ADITYA PATHAK/.gemini/antigravity/brain/be96e36d-fe67-4773-89c2-2e01ed9919b0/scratch/e2e_core_chat_test.mjs\""
+    "test": "node tests/bug-hunt/auth-validation.test.mjs"
   },
   "keywords": [],
   "author": "",
