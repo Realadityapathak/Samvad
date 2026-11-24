@@ -687,7 +687,7 @@ Contributions are welcome. To maintain codebase integrity, please follow these g
 ### Author
 - **Aditya Pathak**
 - GitHub: [@Realadityapathak](https://github.com/Realadityapathak)
-- Repository: [Chat-App](https://github.com/Realadityapathak/Samvad)
+- Repository: [Samvad](https://github.com/Realadityapathak/Samvad)
 
 ### Acknowledgements & Key Libraries
 - [React](https://react.dev) & [Vite](https://vitejs.dev)
